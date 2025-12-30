@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AppMenu>
+	<Application name="SnapSystem" image_namespace="Image.SnapSystem.SnapSystem.Images.SnapSystem.png">
+		<Title localizable="true">SnapSystem TB Application</Title>
+		<Group name="SnapSystem.SnapSystem">
+			<Title localizable="true">SnapSystem module</Title>
+			<Menu name="SnapSystemOptions">
+			<Title localizable="true">SnapSystem Options</Title>
+			</Menu>
+		</Group>
+	</Application>
+</AppMenu>

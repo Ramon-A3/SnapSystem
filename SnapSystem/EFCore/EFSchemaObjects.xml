@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DatabaseObjects version="1">
+    <Signature>SnapSystem</Signature>
+    <Release>1</Release>
+    <Tables>
+        <Table namespace="SnapSystem.SnapSystem.SnapSystemDbl.SNAP_SaleOrdDetails" mastertable="true">
+            <DocumentationInfo localizable_1="true">SNAP_SaleOrdDetails master table</DocumentationInfo>
+            <Create release="1" createstep="1" />
+            <Columns>
+                <Column>
+                    <SchemaInfo localizable_1="true" type="String" defaultvalue="" length="10">Code</SchemaInfo>
+                    <DocumentationInfo localizable_1="true" mandatory="true">SNAP_SaleOrdDetails code</DocumentationInfo>
+                </Column>
+                <Column>
+                    <SchemaInfo localizable_1="true" type="String" defaultvalue="" length="128">Description</SchemaInfo>
+                    <DocumentationInfo localizable_1="true">SNAP_SaleOrdDetails description</DocumentationInfo>
+                </Column>
+            </Columns>
+            <PrimaryKey name="PK_SNAP_SaleOrdDetails" type="NONCLUSTERED">
+                <Segments>Code</Segments>
+            </PrimaryKey>
+            <Indexes/>
+        </Table>
+    </Tables>
+</DatabaseObjects>

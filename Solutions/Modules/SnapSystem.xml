@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SalesModule producer="A3 Soluzioni Informatiche" localize="SnapSystem module" edition="Professional">
+  <ShortNames>
+    <ShortName name="SNPM" />
+  </ShortNames>
+  <Application container="Applications" name="SnapSystem">
+    <Module name="SnapSystem" />
+  </Application>
+</SalesModule>

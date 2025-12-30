@@ -1,0 +1,8 @@
+<Applications localize="SnapSystem" configurable="true">
+  <Application container="Applications" name="SnapSystem">
+    <Incompatibilities />
+    <Module name="SnapSystem">
+		<Allow iso="IT,GB,RO,BG,HU,ES" />
+    </Module>
+  </Application>
+</Applications>

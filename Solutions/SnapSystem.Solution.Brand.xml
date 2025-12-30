@@ -1,0 +1,17 @@
+<Brands>
+	<Brand>
+		<Applications>
+			<Application name="SnapSystem">
+			<MenuTitle>SnapSystem TB Application</MenuTitle>
+			</Application>
+		</Applications>
+		<BrandedKeys>
+			<BrandedKey source="Company" branded="A3 Soluzioni Informatiche" />
+			<BrandedKey source="CompanyLogo" branded="Image.SnapSystem.SnapSystem.CompanyLogo.png" />
+			<BrandedKey source="MenuManagerSplash" branded="Image.SnapSystem.SnapSystem.SplashMenuManager.jpg" />
+			<BrandedKey source="ProductTitle" branded="SnapSystem TB Application" />
+		</BrandedKeys>
+	</Brand>
+</Brands>
+	
+
