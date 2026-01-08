@@ -132,7 +132,7 @@
       <AdditionalIncludeDirectories>$(IntDir);$(ERP);$(SnapSystem);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>TbParser.lib;TbGeneric.lib;TbGes.lib;TbNameSolver.lib;TbClientCore.lib;TbResourcesMng.lib;TbWebServicesWrappers.lib;%(AdditionalDependencies);</AdditionalDependencies>
+      <AdditionalDependencies>SalesDbl.lib;TbParser.lib;TbGeneric.lib;TbGes.lib;TbNameSolver.lib;TbClientCore.lib;TbResourcesMng.lib;TbWebServicesWrappers.lib;%(AdditionalDependencies);</AdditionalDependencies>
       <OutputFile>$(OutDir)SnapSystemDbl.dll</OutputFile>
       <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories);$(TBOCLib)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
@@ -189,7 +189,7 @@
       <AdditionalIncludeDirectories>$(IntDir);$(ERP);$(SnapSystem);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>TbParser.lib;TbGeneric.lib;TbGes.lib;TbNameSolver.lib;TbClientCore.lib;TbResourcesMng.lib;%(AdditionalDependencies);</AdditionalDependencies>
+      <AdditionalDependencies>SalesDbl.lib;TbParser.lib;TbGeneric.lib;TbGes.lib;TbNameSolver.lib;TbClientCore.lib;TbResourcesMng.lib;%(AdditionalDependencies);</AdditionalDependencies>
       <OutputFile>$(OutDir)SnapSystemDbl.dll</OutputFile>
       <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories);$(TBOCLib)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
@@ -275,11 +275,10 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="TSNAP_SaleOrdDetails.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TSalesOrdDetailsAddOn.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="TSNAP_SaleOrdDetails.cpp" />
     <ClCompile Include="SnapSystemDblinterface.cpp" />
     <ClCompile Include="SnapSystemDbl.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -287,6 +286,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseDebugInfo|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TSalesOrdDetailsAddOn.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="beginh.dex" />

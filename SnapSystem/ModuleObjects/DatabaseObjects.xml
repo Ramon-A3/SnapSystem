@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <DatabaseObjects>
     <Signature>SnapSystem</Signature>
-    <Release>1</Release>
-    <Tables>
-        <Table namespace="SnapSystem.SnapSystem.SnapSystemDbl.SNAP_SaleOrdDetails" mastertable="true" >
-            <Create release="1" createstep="1" />
-            <Columns>
-                <Column name="Code" localize="Code" lenght="10" type="string" defaultvalue="" release="1" />
-                <Column name="Description" localize="Description" lenght="128" type="string" defaultvalue="" release="1" />
-            </Columns>
-        </Table>
-    </Tables>
+    <Release>2</Release>
+    <Tables/>
 </DatabaseObjects>

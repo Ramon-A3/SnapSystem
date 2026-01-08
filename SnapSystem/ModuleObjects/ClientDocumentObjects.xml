@@ -3,5 +3,6 @@
     <ClientDocuments>
     </ClientDocuments>
     <ClientForms>
+        <ClientForm name="D.SnapSystem.SnapSystem.CDSalesOrderAddOn.IDD_TD_SALE_ORD_ADDON" server="IDD_SALESORDER"/>
     </ClientForms>
 </ClientDocumentObjects>

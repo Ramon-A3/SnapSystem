@@ -1,8 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <CreateInfo>
     <ModuleInfo name="SnapSystem" />
+    <DBRel numrel="2">
     <Level1>
-        <Step numstep="1" script="SNAP_SaleOrdDetails.sql" />
+        <Step numstep="1" script="01_AlterSalesOrdDetails_AddMarginFields.sql">
+            <Dependency app="ERP" module="SalesOrd" />
+        </Step>
     </Level1>
-    <Level2 />
+    <Level2/>
+    </DBRel>
 </CreateInfo>
