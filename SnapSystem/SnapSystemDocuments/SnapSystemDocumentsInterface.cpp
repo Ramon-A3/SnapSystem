@@ -2,7 +2,8 @@
 // Module name  : SnapSystemDocumentsInterface.cpp
 //=============================================================================
 
-#include "stdafx.h" 
+#include "stdafx.h"
+#include "CDSalesOrderAddOn.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -40,6 +41,9 @@ BEGIN_ADDON_INTERFACE()
 
 	//-----------------------------------------------------------------------------
 	BEGIN_CLIENT_DOC()
+		WHEN_SERVER_DOC(DSalesOrder)
+			ATTACH_CLIENT_DOC(CDSalesOrderAddOn, _NS_CD("SalesOrderAddOn"))
+		END_SERVER_DOC()
 	END_CLIENT_DOC()
 
 END_ADDON_INTERFACE()
