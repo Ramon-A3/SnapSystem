@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AddOnDatabaseObjects>
     <AdditionalColumns>
-        <Table namespace="ERP.SaleOrders.Dbl.TSaleOrdDetails">
+        <Table namespace="ERP.SaleOrders.Dbl.MA_SaleOrdDetails">
             <AlterTable namespace="SnapSystem.SnapSystem.SnapSystemDbl"
                         release="2" createstep="1" />
         </Table>

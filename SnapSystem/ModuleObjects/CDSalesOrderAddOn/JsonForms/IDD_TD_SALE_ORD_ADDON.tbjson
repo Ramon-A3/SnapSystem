@@ -1,5 +1,29 @@
 {
-  "id": "IDD_TD_SALESORDER_DETAIL",
-  "items": [
-     
-  }
+	"id": "IDC_SALESORDER_BODY_DETAIL",
+	"items": [
+		{
+			"type": "ColTitle",
+			"controlClass": "MoneyEdit",
+			"binding": { "datasource": "Detail.LastCost" },
+			"id": "IDC_SALESORDER_DETAIL_LASTCOST",
+			"text": "Last Cost",
+			"name": "IDC_SALESORDER_DETAIL_LASTCOST"
+		},
+		{
+			"type": "ColTitle",
+			"controlClass": "MoneyEdit",
+			"binding": { "datasource": "Detail.Margin" },
+			"id": "IDC_SALESORDER_DETAIL_MARGIN",
+			"text": "Margin",
+			"name": "IDC_SALESORDER_DETAIL_MARGIN"
+		},
+		{
+			"type": "ColTitle",
+			"controlClass": "MoneyEdit",
+			"binding": { "datasource": "Detail.SalesPersonMarginComm" },
+			"id": "IDC_SALESORDER_DETAIL_SALESPERSONMARGINCOMM",
+			"text": "Sales Person Commission Margin",
+			"name": "IDC_SALESORDER_DETAIL_SALESPERSONMARGINCOMM"
+		}
+	]
+}
