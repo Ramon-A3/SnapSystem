@@ -1,8 +1,3 @@
-//=============================================================================
-// Module name  : CDSalesOrderAddOn.cpp
-// Description  : Client Document for Sales Order margin/commission calculation
-//=============================================================================
-
 #include "stdafx.h"
 
 // ERP includes
@@ -11,6 +6,8 @@
 #include <SaleOrders\Dbl\TSalesOrder.h>
 #include <Inventory\Dbl\TItemsBalances.h>
 #include <SalesPeople\Dbl\TSalesPeople.h>
+#include <PricePolicies\Dbl\TItemPricesPolicies.h>
+#include <SalesPeople\JsonForms\UISalesPeopleDialog\IDD_TD_SALESPEOPLE.hjson>
 
 // Local includes
 #include "CDSalesOrderAddOn.h"
@@ -64,10 +61,6 @@ protected:
 		// Filter by Item (primary filter)
 		m_pTable->AddFilterColumn(GetRecord()->f_Item);
 		m_pTable->AddParam(szP1, GetRecord()->f_Item);
-		// Note: For complete implementation, also filter by:
-		// - f_FiscalYear (current fiscal year)
-		// - f_Storage (default storage)
-		// For Phase 2, using simplified Item-only filter
 	}
 
 	virtual void OnPrepareQuery()
@@ -132,6 +125,121 @@ protected:
 IMPLEMENT_DYNAMIC(TRSalesPeopleLocal, TableReader)
 
 //////////////////////////////////////////////////////////////////////////////
+//             RRItemsPriceListsByItem - RowsetReader for MA_ItemsPriceLists
+//             Fetches Price by Item only (no PriceList filter required)
+//             Selects most recent valid price based on:
+//               - ValidityStart <= CurrentDate (ordered DESC for most recent)
+//               - ValidityEnd >= CurrentDate OR ValidityEnd is empty/null
+//               - Quantity >= OrderQuantity
+//////////////////////////////////////////////////////////////////////////////
+class RRItemsPriceListsByItem : public RowsetReader
+{
+	DECLARE_DYNAMIC(RRItemsPriceListsByItem)
+
+private:
+	DataStr		m_Item;
+	DataDate	m_Date;
+	DataQty		m_Qty;
+
+public:
+	RRItemsPriceListsByItem(CAbstractFormDoc* pDocument = NULL)
+		: RowsetReader(RUNTIME_CLASS(TItemsPriceLists), pDocument)
+	{
+	}
+
+	TItemsPriceLists* GetRecord() const
+	{
+		return (TItemsPriceLists*)m_pRecord;
+	}
+
+	RowsetReader::FindResult FindRecord(const DataStr& sItem, const DataDate& aDate, const DataQty& aQty)
+	{
+		m_Item = sItem;
+		m_Date = aDate;
+		m_Qty = aQty;
+
+		SetForceQuery();
+		RowsetReader::FindResult aResult = RowsetReader::FindRecord();
+		SetForceQuery(FALSE);
+
+		if (IsEmptyQuery())
+		{
+			if (m_pTable)
+				m_pTable->Disconnect();
+			return aResult;
+		}
+
+		// Iterate through results to find first valid price
+		// Query is ordered by StartingValidityDate DESC, Quantity ASC
+		while (!m_pTable->IsEOF())
+		{
+			// Check validity period: EndDate empty OR EndDate >= CurrentDate
+			if (GetRecord()->f_ValidityEndingDate.IsEmpty() ||
+				m_Date <= GetRecord()->f_ValidityEndingDate)
+			{
+				// Quantity loop: find first record where PriceList.Qty >= Order.Qty
+				while (!m_pTable->IsEOF())
+				{
+					if (GetRecord()->f_Quantity < m_Qty)
+					{
+						m_pTable->MoveNext();
+						if (m_pTable->IsEOF())
+							return RowsetReader::NOT_FOUND;
+						continue;
+					}
+					else
+					{
+						if (m_pTable)
+							m_pTable->Disconnect();
+						return RowsetReader::FOUND;
+					}
+				}
+			}
+			else
+			{
+				m_pTable->MoveNext();
+			}
+		}
+
+		return RowsetReader::NOT_FOUND;
+	}
+
+protected:
+	virtual void OnDefineQuery()
+	{
+		m_pTable->SelectAll();
+
+		// Filter only by Item (no PriceList filter!)
+		m_pTable->AddFilterColumn(GetRecord()->f_Item);
+		m_pTable->AddParam(szP1, GetRecord()->f_Item);
+
+		// Filter by date range: StartingValidityDate <= CurrentDate
+		DataDate ToDateEmpty(DataDate::NULLDATE);
+		m_pTable->AddFilterColumn(GetRecord()->f_StartingValidityDate, _T("<="));
+		m_pTable->AddParam(szP2, GetRecord()->f_StartingValidityDate);
+
+		// ValidityEndingDate filter handled in FindRecord loop
+
+		// Sort by StartingValidityDate DESC (most recent first), then Quantity ASC
+		m_pTable->AddSortColumn(GetRecord()->f_StartingValidityDate, TRUE); // descending
+		m_pTable->AddSortColumn(GetRecord()->f_Quantity); // ascending
+	}
+
+	virtual void OnPrepareQuery()
+	{
+		m_pTable->SetParamValue(szP1, m_Item);
+		m_pTable->SetParamValue(szP2, m_Date);
+	}
+
+	virtual BOOL IsEmptyQuery()
+	{
+		return m_Item.IsEmpty();
+	}
+};
+
+IMPLEMENT_DYNAMIC(RRItemsPriceListsByItem, RowsetReader)
+
+//////////////////////////////////////////////////////////////////////////////
 //             CDSalesOrderAddOn Implementation
 //////////////////////////////////////////////////////////////////////////////
 
@@ -169,7 +277,33 @@ BOOL CDSalesOrderAddOn::OnInitAuxData()
 //-----------------------------------------------------------------------------
 BOOL CDSalesOrderAddOn::OnPrepareAuxData()
 {
+	// This overload is called during NEW/EDIT/BROWSE mode transitions
+	// Recalculate all details to ensure consistency
+	RecalculateAllDetails();
+
 	return TRUE;
+}
+
+//-----------------------------------------------------------------------------
+// OnPrepareAuxData(UINT nID) - Called when a specific TileDialog is prepared
+// This is the KEY method to intercept SalesPeople tile changes!
+// When the user changes Policy or Salesperson in the SalesPeople tile,
+// this method is called with nID == IDD_TD_SALESPEOPLE
+//-----------------------------------------------------------------------------
+void CDSalesOrderAddOn::OnPrepareAuxData(UINT nID)
+{
+	// IMPORTANT: Call base class FIRST to ensure all other AddOns have processed
+	// This allows CDSaleOrdSalesPeople to do BindDBT() before we read the values
+	__super::OnPrepareAuxData(nID);
+
+	// Check if the SalesPeople tile is being prepared/updated
+	// This happens when Policy or Salesperson fields change
+	if (nID == IDD_TD_SALESPEOPLE)
+	{
+		// Recalculate all detail lines with the new Policy/Salesperson values
+		// Called AFTER __super to ensure the header record has been updated
+		RecalculateAllDetails();
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -196,18 +330,24 @@ double CDSalesOrderAddOn::GetLastCostFromBalances(const DataStr& sItem)
 
 //-----------------------------------------------------------------------------
 // GetPriceFromPriceList - Fetches Price from MA_ItemsPriceLists
-// For Phase 2, using LastCost as fallback
+// Uses custom RRItemsPriceListsByItem to query price by Item only
+// Automatically selects most recent valid price based on date and quantity
 //-----------------------------------------------------------------------------
 double CDSalesOrderAddOn::GetPriceFromPriceList(const DataStr& sPriceList, const DataStr& sItem, double dQty)
 {
 	double dPrice = 0.0;
 
-	if (sPriceList.IsEmpty() || sItem.IsEmpty())
+	// Only Item is required - PriceList parameter is ignored in Policy 02
+	if (sItem.IsEmpty())
 		return dPrice;
 
-	// TODO: Implement TRItemsPriceLists for Phase 3
-	// For now, use LastCost as fallback
-	dPrice = GetLastCostFromBalances(sItem);
+	// Use our custom RowsetReader that searches by Item only (no PriceList filter)
+	RRItemsPriceListsByItem aRRPriceLists(GetServerDoc());
+	if (aRRPriceLists.FindRecord(sItem, AfxGetApplicationDate(), (DataQty)dQty) == RowsetReader::FOUND)
+	{
+		// Get Price from MA_ItemsPriceLists record (DataMon type)
+		dPrice = (double)aRRPriceLists.GetRecord()->f_Price;
+	}
 
 	return dPrice;
 }
@@ -216,6 +356,7 @@ double CDSalesOrderAddOn::GetPriceFromPriceList(const DataStr& sPriceList, const
 // GetCostByPolicy - Fetches cost based on SalespersonPolicy
 // Policy 01: LastCost from MA_ItemsBalances
 // Policy 02: Price from MA_ItemsPriceLists
+// Empty/Unknown: returns 0
 //-----------------------------------------------------------------------------
 double CDSalesOrderAddOn::GetCostByPolicy(const DataStr& sItem, const DataStr& sPriceList, const DataStr& sPolicy, double dQty)
 {
@@ -234,11 +375,7 @@ double CDSalesOrderAddOn::GetCostByPolicy(const DataStr& sItem, const DataStr& s
 	{
 		dCost = GetPriceFromPriceList(sPriceList, sItem, dQty);
 	}
-	// Default: use LastCost
-	else
-	{
-		dCost = GetLastCostFromBalances(sItem);
-	}
+	// No policy or unknown policy: return 0 (dCost already initialized to 0)
 
 	return dCost;
 }
@@ -267,8 +404,8 @@ double CDSalesOrderAddOn::GetBaseCommission(const DataStr& sSalesperson)
 
 //-----------------------------------------------------------------------------
 // CalculateMarginAndCommission - Core calculation logic
-// Margin = (UnitValue - LastCost) × Quantity
-// SalesPersonMarginComm = Margin × (BaseCommission / 100)
+// Margin = (UnitValue - LastCost) Ã— Quantity
+// SalesPersonMarginComm = Margin Ã— (BaseCommission / 100)
 //-----------------------------------------------------------------------------
 void CDSalesOrderAddOn::CalculateMarginAndCommission(TSaleOrdDetails* pDetail)
 {
@@ -321,10 +458,10 @@ void CDSalesOrderAddOn::CalculateMarginAndCommission(TSaleOrdDetails* pDetail)
 	// Get base commission percentage (from MA_SalesPeople.f_BaseCommission)
 	double dBaseCommission = GetBaseCommission(sSalesperson);
 
-	// Calculate Margin = (UnitValue - Cost) × Quantity
+	// Calculate Margin = (UnitValue - Cost) Ã— Quantity
 	double dMargin = (dUnitValue - dCost) * dQty;
 
-	// Calculate Commission = Margin × (BaseCommission / 100)
+	// Calculate Commission = Margin Ã— (BaseCommission / 100)
 	double dCommission = dMargin * (dBaseCommission / 100.0);
 
 	// Update our AddOn fields
@@ -380,4 +517,30 @@ void CDSalesOrderAddOn::OnUnitValueChanged()
 		return;
 
 	CalculateMarginAndCommission(pDetail);
+}
+
+//-----------------------------------------------------------------------------
+// RecalculateAllDetails - Iterates all detail lines and recalculates margins
+// Called when OnPrepareAuxData triggers (when Policy/Salesperson change)
+//-----------------------------------------------------------------------------
+void CDSalesOrderAddOn::RecalculateAllDetails()
+{
+	DSalesOrder* pServerDoc = GetServerDoc();
+	if (!pServerDoc)
+		return;
+
+	// Get DBT for detail lines using GetDBTDetail()
+	DBTSlaveBuffered* pDBTDetails = pServerDoc->GetDBTDetail();
+	if (!pDBTDetails)
+		return;
+
+	// Iterate through all rows and recalculate each one
+	for (int i = 0; i < pDBTDetails->GetSize(); i++)
+	{
+		TSaleOrdDetails* pDetail = (TSaleOrdDetails*)pDBTDetails->GetRow(i);
+		if (pDetail)
+		{
+			CalculateMarginAndCommission(pDetail);
+		}
+	}
 }

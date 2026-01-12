@@ -37,6 +37,7 @@ protected:
 	virtual BOOL OnAttachData();
 	virtual BOOL OnInitAuxData();
 	virtual BOOL OnPrepareAuxData();
+	virtual void OnPrepareAuxData(UINT nID);  // Called when specific tiles are prepared
 
 protected:
 	// Helper methods for margin/commission calculation
@@ -46,6 +47,7 @@ protected:
 	double GetLastCostFromBalances(const DataStr& sItem);
 	double GetPriceFromPriceList(const DataStr& sPriceList, const DataStr& sItem, double dQty);
 
+	void RecalculateAllDetails();
 protected:
 	//{{AFX_MSG(CDSalesOrderAddOn)
 	afx_msg void OnItemChanged();
