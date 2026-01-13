@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "TSalesOrdDetailsAddOn.h"
+#include "TItemsPriceListsAddOn.h"
+#include "TSalesPeopleAddOn.h"
 
 
 #ifdef _DEBUG
@@ -16,7 +18,7 @@ static char THIS_FILE[] = __FILE__;
 
 //-----------------------------------------------------------------------------
 BEGIN_ADDON_INTERFACE()
-	DATABASE_RELEASE(2)
+	DATABASE_RELEASE(3)
 
 	//-----------------------------------------------------------------------------
 	BEGIN_TABLES()
@@ -29,6 +31,14 @@ BEGIN_ADDON_INTERFACE()
 
 		WHEN_TABLE(TSaleOrdDetails)
 			ADDON_COLUMNS_CLASS(TSalesOrdDetailsAddOn)
+		END_TABLE
+
+		WHEN_TABLE(TItemsPriceLists)
+			ADDON_COLUMNS_CLASS(TItemsPriceListsAddOn)
+		END_TABLE
+
+		WHEN_TABLE(TSalesPeople)
+			ADDON_COLUMNS_CLASS(TSalesPeopleAddOn)
 		END_TABLE
 
 	END_ADDON_NEW_COLUMNS()
