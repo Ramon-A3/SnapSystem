@@ -2,6 +2,7 @@
 -- Script: 03_AlterSalesPeople.sql
 -- Description: Add MaxDeviationPerc column to MA_SalesPeople
 -- MaxDeviationPerc = Percentuale Massima Scostamento (default 40%)
+-- Type: numeric(19,6) - Consistent with percentage fields in MA_SalesPeople
 -- ============================================================================
 
 IF NOT EXISTS (

@@ -2,6 +2,7 @@
 -- Script: 02_AlterItemsPriceLists.sql
 -- Description: Add MinimumCost column to MA_ItemsPriceLists
 -- MinimumCost = Price after applying Discount1 and Discount2
+-- Type: numeric(19,6) - Consistent with Price field in MA_ItemsPriceLists
 -- ============================================================================
 
 IF NOT EXISTS (
