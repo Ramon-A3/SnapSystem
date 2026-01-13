@@ -13,6 +13,8 @@
 // Local includes
 #include "CDSalesOrderAddOn.h"
 #include <SnapSystem\SnapSystemDbl\TSalesOrdDetailsAddOn.h>
+#include <SnapSystem\SnapSystemDbl\TItemsPriceListsAddOn.h>
+#include <SnapSystem\SnapSystemDbl\TSalesPeopleAddOn.h>
 #include <SnapSystem\ModuleObjects\CDSalesOrderAddOn\JsonForms\IDD_TD_SALE_ORD_ADDON.hjson>
 
 #ifdef _DEBUG
@@ -432,6 +434,58 @@ double CDSalesOrderAddOn::GetBaseCommission(const DataStr& sSalesperson)
 }
 
 //-----------------------------------------------------------------------------
+// GetMinimumCostFromPriceList - Fetches MinimumCost from MA_ItemsPriceLists
+//-----------------------------------------------------------------------------
+double CDSalesOrderAddOn::GetMinimumCostFromPriceList(const DataStr& sItem, double dQty)
+{
+    double dMinimumCost = 0.0;
+
+    if (sItem.IsEmpty())
+        return dMinimumCost;
+
+    // Use existing RRItemsPriceListsByItem to find the record
+    RRItemsPriceListsByItem aRRPriceLists(GetServerDoc());
+    if (aRRPriceLists.FindRecord(sItem, AfxGetApplicationDate(), (DataQty)dQty) == RowsetReader::FOUND)
+    {
+        // Get AddOn fields from the record
+        TItemsPriceListsAddOn* pAddOn = (TItemsPriceListsAddOn*)aRRPriceLists.GetRecord()->GetAddOnFields(
+            RUNTIME_CLASS(TItemsPriceListsAddOn));
+        if (pAddOn)
+        {
+            dMinimumCost = (double)pAddOn->f_MinimumCost;
+        }
+    }
+
+    return dMinimumCost;
+}
+
+//-----------------------------------------------------------------------------
+// GetMaxDeviationPerc - Fetches MaxDeviationPerc from MA_SalesPeople
+//-----------------------------------------------------------------------------
+double CDSalesOrderAddOn::GetMaxDeviationPerc(const DataStr& sSalesperson)
+{
+    double dMaxDeviationPerc = 40.0;  // Default value
+
+    if (sSalesperson.IsEmpty())
+        return dMaxDeviationPerc;
+
+    // Use existing TRSalesPeopleLocal to find the record
+    TRSalesPeopleLocal aTRSalesPeople(GetServerDoc());
+    if (aTRSalesPeople.FindRecord(sSalesperson) == TableReader::FOUND)
+    {
+        // Get AddOn fields from the record
+        TSalesPeopleAddOn* pAddOn = (TSalesPeopleAddOn*)aTRSalesPeople.GetRecord()->GetAddOnFields(
+            RUNTIME_CLASS(TSalesPeopleAddOn));
+        if (pAddOn)
+        {
+            dMaxDeviationPerc = (double)pAddOn->f_MaxDeviationPerc;
+        }
+    }
+
+    return dMaxDeviationPerc;
+}
+
+//-----------------------------------------------------------------------------
 // CalculateMarginAndCommission - Core calculation logic
 // Margin = (UnitValue - LastCost) × Quantity
 // SalesPersonMarginComm = Margin × (BaseCommission / 100)
@@ -490,15 +544,33 @@ void CDSalesOrderAddOn::CalculateMarginAndCommission(TSaleOrdDetails* pDetail)
 
 	// Get cost based on policy (from MA_ItemsBalances.f_LastCost or MA_ItemsPriceLists.f_Price)
 	double dCost = GetCostByPolicy(sItem, sPriceList, sSalespersonPolicy, dQty);
-
-	// Get base commission percentage (from MA_SalesPeople.f_BaseCommission)
-	double dBaseCommission = GetBaseCommission(sSalesperson);
-
+	
 	// Calculate Margin = (UnitValue - Cost) × Quantity
 	double dMargin = (dUnitValue - dCost) * dQty;
-
-	// Calculate Commission = Margin × (BaseCommission / 100)
-	double dCommission = dMargin * (dBaseCommission / 100.0);
+	
+	// Calculate Commission based on Policy
+	double dCommission = 0.0;
+	
+	if (sSalespersonPolicy == szPolicy02)
+	{
+		// Policy 02: New formula based on PriceList
+		// Commission = (PriceListPrice - MinimumCost) + (Difference × MaxDeviationPerc / 100)
+		
+		double dPriceListPrice = GetPriceFromPriceList(sPriceList, sItem, dQty);
+		double dMinimumCost = GetMinimumCostFromPriceList(sItem, dQty);
+		double dMaxDeviationPerc = GetMaxDeviationPerc(sSalesperson);
+		
+		double dDifference = dUnitValue - dPriceListPrice;
+		dCommission = (dPriceListPrice - dMinimumCost) + (dDifference * dMaxDeviationPerc / 100.0);
+	}
+	else
+	{
+		// Policy 01 and others: Original formula
+		// Commission = Margin × (BaseCommission / 100)
+		
+		double dBaseCommission = GetBaseCommission(sSalesperson);
+		dCommission = dMargin * (dBaseCommission / 100.0);
+	}
 
 	// Update our AddOn fields
 	pAddOn->f_LastCost = dCost;

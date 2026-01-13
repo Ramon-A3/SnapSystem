@@ -63,13 +63,17 @@ protected:
 	virtual BOOL OnPrepareAuxData();
 	virtual void OnPrepareAuxData(UINT nID);  // Called when specific tiles are prepared
 
-public:
+ public:
 	// Helper methods for margin/commission calculation
 	void CalculateMarginAndCommission(TSaleOrdDetails* pDetail);
 	double GetCostByPolicy(const DataStr& sItem, const DataStr& sPriceList, const DataStr& sPolicy, double dQty);
 	double GetBaseCommission(const DataStr& sSalesperson);
 	double GetLastCostFromBalances(const DataStr& sItem);
 	double GetPriceFromPriceList(const DataStr& sPriceList, const DataStr& sItem, double dQty);
+	
+	// New methods for Policy 02
+	double GetMinimumCostFromPriceList(const DataStr& sItem, double dQty);
+	double GetMaxDeviationPerc(const DataStr& sSalesperson);
 
 	void RecalculateAllDetails();
 
