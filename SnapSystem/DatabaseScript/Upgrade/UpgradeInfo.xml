@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UpgradeInfo>
 	<ModuleInfo name="SnapSystem" />
-	<DBRel numrel="2">
+	<DBRel numrel="3">
 	<Level1>
 		<Step numstep="1" script="01_AlterSalesOrdDetails_AddMarginFields.sql">
 			<Dependency app="ERP" module="SalesOrd" />
 		</Step>
 	</Level1>
-	<Level2/>
+	<Level2>
+		<Step numstep="2" script="02_AlterItemsPriceLists.sql">
+			<Dependency app="ERP" module="PricePolicies" />
+		</Step>
+		<Step numstep="3" script="03_AlterSalesPeople.sql">
+			<Dependency app="ERP" module="SalesPeople" />
+		</Step>
+	</Level2>
 	</DBRel>
 </UpgradeInfo>
