@@ -5,8 +5,8 @@
 -- ============================================================================
 
 IF NOT EXISTS (
-    SELECT * FROM syscolumns 
-    WHERE id = object_id(N'[dbo].[MA_SalesPeople]') 
+    SELECT 1 FROM sys.columns 
+    WHERE object_id = object_id(N'[dbo].[MA_SalesPeople]') 
       AND name = 'MaxDeviationPerc'
 )
 BEGIN

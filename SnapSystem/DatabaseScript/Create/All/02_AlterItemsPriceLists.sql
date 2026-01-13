@@ -5,8 +5,8 @@
 -- ============================================================================
 
 IF NOT EXISTS (
-    SELECT * FROM syscolumns 
-    WHERE id = object_id(N'[dbo].[MA_ItemsPriceLists]') 
+    SELECT 1 FROM sys.columns 
+    WHERE object_id = object_id(N'[dbo].[MA_ItemsPriceLists]') 
       AND name = 'MinimumCost'
 )
 BEGIN
