@@ -249,9 +249,9 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
       <AdditionalIncludeDirectories>$(IntDir);$(ERP);$(SnapSystem);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ResourceCompile>
+     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>CoreDbl.lib;InventoryDbl.lib;SalesDbl.lib;TbParser.lib;TbGeneric.lib;TbGes.lib;TbNameSolver.lib;TbClientCore.lib;TbResourcesMng.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>PricePoliciesDbl.lib;SalesPeopleDbl.lib;CoreDbl.lib;InventoryDbl.lib;SalesDbl.lib;TbParser.lib;TbGeneric.lib;TbGes.lib;TbNameSolver.lib;TbClientCore.lib;TbResourcesMng.lib;TbWebServicesWrappers.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)SnapSystemDbl.dll</OutputFile>
       <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories);$(TBOCLib)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
