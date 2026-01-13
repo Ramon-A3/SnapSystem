@@ -6,6 +6,7 @@
 #pragma once
 
 #include <Items\Documents\DItems.h>
+#include <SnapSystem\ModuleObjects\CDItemsPriceListsAddOn\JsonForms\IDD_TD_PRICELISTS_ADDON.hjson>
 
 #include "beginh.dex"
 

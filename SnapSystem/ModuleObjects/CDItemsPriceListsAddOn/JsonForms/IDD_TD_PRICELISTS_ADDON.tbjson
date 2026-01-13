@@ -1,0 +1,17 @@
+{
+    "id": "IDD_ITEM_PRICELISTS_BODY",
+    "items": [
+        {
+            "type": "ColTitle",
+            "controlClass": "MoneyEdit",
+            "binding": {
+                "datasource": "ItemsPriceLists.MinimumCost"
+            },
+            "id": "IDC_PRICELISTS_MINIMUMCOST",
+            "text": "Minimum Cost",
+            "name": "IDC_PRICELISTS_MINIMUMCOST",
+            "grayed": true,
+            "numberDecimal": "{{NAMoneyDecimal}}"
+        }
+    ]
+}

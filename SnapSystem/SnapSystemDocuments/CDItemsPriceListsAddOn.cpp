@@ -11,6 +11,7 @@
 
 #include "CDItemsPriceListsAddOn.h"
 #include <SnapSystem\SnapSystemDbl\TItemsPriceListsAddOn.h>
+#include <SnapSystem\ModuleObjects\CDItemsPriceListsAddOn\JsonForms\IDD_TD_PRICELISTS_ADDON.hjson>
 
 #ifdef _DEBUG
 #undef THIS_FILE

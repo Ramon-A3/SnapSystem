@@ -1,0 +1,4 @@
+#pragma once
+#include	<TbNameSolver\TBResourcesMap.h>
+#define IDD_TD_PRICELISTS_ADDON	GET_IDD(IDD_TD_PRICELISTS_ADDON,D.SnapSystem.SnapSystem.CDItemsPriceListsAddOn)
+#define IDC_PRICELISTS_MINIMUMCOST	GET_IDC(IDC_PRICELISTS_MINIMUMCOST)

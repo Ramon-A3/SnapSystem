@@ -277,11 +277,13 @@
   <ItemGroup>
     <ClInclude Include="CDSalesOrderAddOn.h" />
     <ClInclude Include="CDItemsPriceListsAddOn.h" />
+    <ClInclude Include="CDSalesPeopleAddOn.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CDSalesOrderAddOn.cpp" />
     <ClCompile Include="CDItemsPriceListsAddOn.cpp" />
+    <ClCompile Include="CDSalesPeopleAddOn.cpp" />
     <ClCompile Include="SnapSystemDocumentsinterface.cpp" />
     <ClCompile Include="SnapSystemDocuments.cpp" />
     <ClCompile Include="stdafx.cpp">

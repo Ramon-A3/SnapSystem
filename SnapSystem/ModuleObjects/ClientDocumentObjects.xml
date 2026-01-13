@@ -7,5 +7,11 @@
     </ClientDocuments>
     <ClientForms>
         <ClientForm name="D.SnapSystem.SnapSystem.CDSalesOrderAddOn.IDD_TD_SALE_ORD_ADDON" server="IDD_SALESORDER"/>
+        
+        <!-- Price Lists AddOn (within Items) -->
+        <ClientForm name="D.SnapSystem.SnapSystem.CDItemsPriceListsAddOn.IDD_TD_PRICELISTS_ADDON" server="IDD_ITEMS"/>
+        
+        <!-- SalesPeople AddOn -->
+        <ClientForm name="D.SnapSystem.SnapSystem.CDSalesPeopleAddOn.IDD_TD_SALESPEOPLE_ADDON" server="IDD_SALESPEOPLE"/>
     </ClientForms>
 </ClientDocumentObjects>
