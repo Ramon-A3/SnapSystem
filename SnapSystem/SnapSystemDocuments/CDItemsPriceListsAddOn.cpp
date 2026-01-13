@@ -11,7 +11,6 @@
 
 #include "CDItemsPriceListsAddOn.h"
 #include <SnapSystem\SnapSystemDbl\TItemsPriceListsAddOn.h>
-#include <SnapSystem\ModuleObjects\CDItemsPriceListsAddOn\JsonForms\IDD_TD_PRICELISTS_ADDON.hjson>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -65,6 +64,14 @@ void CDItemsPriceListsAddOn::CalculateMinimumCost(TItemsPriceLists* pRecord)
     double dDiscount1 = (double)pRecord->f_Discount1;
     double dDiscount2 = (double)pRecord->f_Discount2;
 
+    // Validate inputs - ensure non-negative price and reasonable discounts
+    if (dPrice < 0.0 || dDiscount1 < 0.0 || dDiscount2 < 0.0 ||
+        dDiscount1 > 100.0 || dDiscount2 > 100.0)
+    {
+        pAddOn->f_MinimumCost = 0.0;
+        return;
+    }
+
     // Step 1: Apply Discount1
     double dStep1 = dPrice - (dPrice * dDiscount1 / 100.0);
 
@@ -74,6 +81,10 @@ void CDItemsPriceListsAddOn::CalculateMinimumCost(TItemsPriceLists* pRecord)
     {
         dMinimumCost = dStep1 - (dStep1 * dDiscount2 / 100.0);
     }
+
+    // Ensure MinimumCost is non-negative
+    if (dMinimumCost < 0.0)
+        dMinimumCost = 0.0;
 
     // Update AddOn field
     pAddOn->f_MinimumCost = dMinimumCost;

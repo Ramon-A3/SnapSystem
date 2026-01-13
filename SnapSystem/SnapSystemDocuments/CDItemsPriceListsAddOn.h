@@ -6,7 +6,6 @@
 #pragma once
 
 #include <Items\Documents\DItems.h>
-#include <Items\Documents\UIItems.hjson>
 
 #include "beginh.dex"
 

@@ -20,6 +20,7 @@ IMPLEMENT_DYNCREATE(TSalesPeopleAddOn, SqlAddOnFieldsColumn)
 //-----------------------------------------------------------------------------
 TSalesPeopleAddOn::TSalesPeopleAddOn()
 {
+    f_MaxDeviationPerc = 40.0;  // Initialize to default 40%
 }
 
 //-----------------------------------------------------------------------------

@@ -277,6 +277,8 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TSalesOrdDetailsAddOn.h" />
+    <ClInclude Include="TItemsPriceListsAddOn.h" />
+    <ClInclude Include="TSalesPeopleAddOn.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SnapSystemDblinterface.cpp" />
@@ -287,6 +289,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TSalesOrdDetailsAddOn.cpp" />
+    <ClCompile Include="TItemsPriceListsAddOn.cpp" />
+    <ClCompile Include="TSalesPeopleAddOn.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="beginh.dex" />
