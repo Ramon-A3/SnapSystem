@@ -273,7 +273,7 @@
       <Command>
       </Command>
     </PreBuildEvent>
-  </ItemDefinitionGroup>
+   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CDSalesOrderAddOn.h" />
     <ClInclude Include="stdafx.h" />
@@ -292,16 +292,12 @@
     <None Include="beginh.dex" />
     <None Include="endh.dex" />
   </ItemGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
   <ItemGroup>
     <ProjectReference Include="..\SnapSystemDbl\SnapSystemDbl.vcxproj">
       <Project>{947b5590-e55f-11f0-bc07-ad2166ceb91f}</Project>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="CDSalesOrderAddOn.h" />
-    <ClInclude Include="stdafx.h" />
-  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
 </Project>

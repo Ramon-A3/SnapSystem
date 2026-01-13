@@ -9,6 +9,30 @@
 
 #include "beginh.dex"
 
+// Forward declaration
+class CDSalesOrderAddOn;
+
+//////////////////////////////////////////////////////////////////////////////
+//             CSalesOrderAddOnEventMng - Event Manager
+//             Intercepts events from SalesAgent (Commission Policy changes)
+//////////////////////////////////////////////////////////////////////////////
+class CSalesOrderAddOnEventMng : public CEventManager
+{
+	DECLARE_DYNAMIC(CSalesOrderAddOnEventMng)
+
+public:
+	CSalesOrderAddOnEventMng(CDSalesOrderAddOn* pOwner) : m_pOwner(pOwner) {}
+
+private:
+	CDSalesOrderAddOn* m_pOwner;
+
+public:
+	DECLARE_TB_EVENT_MAP();
+	
+	// Event handler called AFTER SalesAgent processes OnCommissionPolicySalespersonChanged
+	void OnCommissionPolicySalespersonChanged();
+};
+
 //////////////////////////////////////////////////////////////////////////////
 //             CDSalesOrderAddOn class declaration 
 //             Extends Sales Order with automatic margin/commission calculation
@@ -39,7 +63,7 @@ protected:
 	virtual BOOL OnPrepareAuxData();
 	virtual void OnPrepareAuxData(UINT nID);  // Called when specific tiles are prepared
 
-protected:
+public:
 	// Helper methods for margin/commission calculation
 	void CalculateMarginAndCommission(TSaleOrdDetails* pDetail);
 	double GetCostByPolicy(const DataStr& sItem, const DataStr& sPriceList, const DataStr& sPolicy, double dQty);
@@ -48,6 +72,7 @@ protected:
 	double GetPriceFromPriceList(const DataStr& sPriceList, const DataStr& sItem, double dQty);
 
 	void RecalculateAllDetails();
+
 protected:
 	//{{AFX_MSG(CDSalesOrderAddOn)
 	afx_msg void OnItemChanged();

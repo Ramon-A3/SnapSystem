@@ -8,6 +8,7 @@
 #include <SalesPeople\Dbl\TSalesPeople.h>
 #include <PricePolicies\Dbl\TItemPricesPolicies.h>
 #include <SalesPeople\JsonForms\UISalesPeopleDialog\IDD_TD_SALESPEOPLE.hjson>
+#include <SalesPeople\Components\SalesPeople.h>
 
 // Local includes
 #include "CDSalesOrderAddOn.h"
@@ -126,7 +127,6 @@ IMPLEMENT_DYNAMIC(TRSalesPeopleLocal, TableReader)
 
 //////////////////////////////////////////////////////////////////////////////
 //             RRItemsPriceListsByItem - RowsetReader for MA_ItemsPriceLists
-//             Fetches Price by Item only (no PriceList filter required)
 //             Selects most recent valid price based on:
 //               - ValidityStart <= CurrentDate (ordered DESC for most recent)
 //               - ValidityEnd >= CurrentDate OR ValidityEnd is empty/null
@@ -240,6 +240,31 @@ protected:
 IMPLEMENT_DYNAMIC(RRItemsPriceListsByItem, RowsetReader)
 
 //////////////////////////////////////////////////////////////////////////////
+//             CSalesOrderAddOnEventMng Implementation
+//             Intercepts events from SalesAgent
+//////////////////////////////////////////////////////////////////////////////
+
+IMPLEMENT_DYNAMIC(CSalesOrderAddOnEventMng, CEventManager)
+
+//-----------------------------------------------------------------------------
+BEGIN_TB_EVENT_MAP_EX(CSalesOrderAddOnEventMng, CEventManager)
+	TB_EVENT(CSalesOrderAddOnEventMng, OnCommissionPolicySalespersonChanged)
+END_TB_EVENT_MAP
+
+//-----------------------------------------------------------------------------
+// Called when SalesAgent fires OnCommissionPolicySalespersonChanged event
+// At this point, the SalesAgent has already updated the header record with
+// the new Policy value, so we can safely recalculate all details.
+//-----------------------------------------------------------------------------
+void CSalesOrderAddOnEventMng::OnCommissionPolicySalespersonChanged()
+{
+	if (m_pOwner)
+	{
+		m_pOwner->RecalculateAllDetails();
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
 //             CDSalesOrderAddOn Implementation
 //////////////////////////////////////////////////////////////////////////////
 
@@ -265,6 +290,10 @@ CDSalesOrderAddOn::CDSalesOrderAddOn()
 //-----------------------------------------------------------------------------
 BOOL CDSalesOrderAddOn::OnAttachData()
 {
+	// Attach our event manager to intercept SalesAgent events
+	// When SalesAgent fires OnCommissionPolicySalespersonChanged, our handler is called
+	Attach(new CSalesOrderAddOnEventMng(this));
+	
 	return TRUE;
 }
 
@@ -404,8 +433,13 @@ double CDSalesOrderAddOn::GetBaseCommission(const DataStr& sSalesperson)
 
 //-----------------------------------------------------------------------------
 // CalculateMarginAndCommission - Core calculation logic
-// Margin = (UnitValue - LastCost) Ã— Quantity
-// SalesPersonMarginComm = Margin Ã— (BaseCommission / 100)
+// Margin = (UnitValue - LastCost) × Quantity
+// SalesPersonMarginComm = Margin × (BaseCommission / 100)
+//
+// This method reads the Policy directly from the header record. It works correctly
+// when called from CSalesOrderAddOnEventMng::OnCommissionPolicySalespersonChanged()
+// because at that point the SalesAgent has already updated the record with the
+// new value via its TB_EVENT handler.
 //-----------------------------------------------------------------------------
 void CDSalesOrderAddOn::CalculateMarginAndCommission(TSaleOrdDetails* pDetail)
 {
@@ -438,7 +472,9 @@ void CDSalesOrderAddOn::CalculateMarginAndCommission(TSaleOrdDetails* pDetail)
 	double dQty = (double)pDetail->f_Quantity;
 	double dUnitValue = (double)pDetail->f_UnitValue;
 
-	// Get values from header (TSalesOrder fields)
+	// Get header values directly from the record
+	// When called from CSalesOrderAddOnEventMng::OnCommissionPolicySalespersonChanged(),
+	// the record already has the NEW value because SalesAgent updates it first.
 	DataStr sSalesperson = pHeader->f_Salesperson;
 	DataStr sSalespersonPolicy = pHeader->f_SalespersonPolicy;
 	DataStr sPriceList = pHeader->f_PriceList;
@@ -452,16 +488,16 @@ void CDSalesOrderAddOn::CalculateMarginAndCommission(TSaleOrdDetails* pDetail)
 		return;
 	}
 
-	// Get cost based on policy (from MA_ItemsBalances.f_LastCost)
+	// Get cost based on policy (from MA_ItemsBalances.f_LastCost or MA_ItemsPriceLists.f_Price)
 	double dCost = GetCostByPolicy(sItem, sPriceList, sSalespersonPolicy, dQty);
 
 	// Get base commission percentage (from MA_SalesPeople.f_BaseCommission)
 	double dBaseCommission = GetBaseCommission(sSalesperson);
 
-	// Calculate Margin = (UnitValue - Cost) Ã— Quantity
+	// Calculate Margin = (UnitValue - Cost) × Quantity
 	double dMargin = (dUnitValue - dCost) * dQty;
 
-	// Calculate Commission = Margin Ã— (BaseCommission / 100)
+	// Calculate Commission = Margin × (BaseCommission / 100)
 	double dCommission = dMargin * (dBaseCommission / 100.0);
 
 	// Update our AddOn fields
@@ -521,7 +557,8 @@ void CDSalesOrderAddOn::OnUnitValueChanged()
 
 //-----------------------------------------------------------------------------
 // RecalculateAllDetails - Iterates all detail lines and recalculates margins
-// Called when OnPrepareAuxData triggers (when Policy/Salesperson change)
+// Called when CSalesOrderAddOnEventMng intercepts OnCommissionPolicySalespersonChanged
+// from SalesAgent. At this point, the header record already has the new Policy value.
 //-----------------------------------------------------------------------------
 void CDSalesOrderAddOn::RecalculateAllDetails()
 {
@@ -544,3 +581,4 @@ void CDSalesOrderAddOn::RecalculateAllDetails()
 		}
 	}
 }
+
