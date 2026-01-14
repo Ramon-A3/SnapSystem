@@ -132,7 +132,7 @@
       <AdditionalIncludeDirectories>$(IntDir);$(ERP);$(SnapSystem);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>TbParser.lib;TbGeneric.lib;TbGes.lib;TbNameSolver.lib;TbClientCore.lib;TbResourcesMng.lib;TbWebServicesWrappers.lib;%(AdditionalDependencies);</AdditionalDependencies>
+      <AdditionalDependencies>SalesDocuments.lib;SalesAddOnsInventory.lib;CoreDbl.lib;InventoryDbl.lib;InventoryDocuments.lib;SalesDbl.lib;TbParser.lib;TbGeneric.lib;TbGes.lib;TbNameSolver.lib;TbClientCore.lib;TbResourcesMng.lib;TbWebServicesWrappers.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)SnapSystemDocuments.dll</OutputFile>
       <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories);$(TBOCLib)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
@@ -189,7 +189,7 @@
       <AdditionalIncludeDirectories>$(IntDir);$(ERP);$(SnapSystem);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>TbParser.lib;TbGeneric.lib;TbGes.lib;TbNameSolver.lib;TbClientCore.lib;TbResourcesMng.lib;%(AdditionalDependencies);</AdditionalDependencies>
+<AdditionalDependencies>SalesDocuments.lib;CoreDbl.lib;InventoryDbl.lib;InventoryDocuments.lib;SalesDbl.lib;TbParser.lib;TbGeneric.lib;TbGes.lib;TbNameSolver.lib;TbClientCore.lib;TbResourcesMng.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)SnapSystemDocuments.dll</OutputFile>
       <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories);$(TBOCLib)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
@@ -251,7 +251,7 @@
       <AdditionalIncludeDirectories>$(IntDir);$(ERP);$(SnapSystem);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>TbParser.lib;TbGeneric.lib;TbGes.lib;TbNameSolver.lib;TbClientCore.lib;TbResourcesMng.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SalesDocuments.lib;CoreDbl.lib;InventoryDbl.lib;InventoryDocuments.lib;SalesDbl.lib;TbParser.lib;TbGeneric.lib;TbGes.lib;TbNameSolver.lib;TbClientCore.lib;TbResourcesMng.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)SnapSystemDocuments.dll</OutputFile>
       <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories);$(TBOCLib)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
@@ -273,11 +273,17 @@
       <Command>
       </Command>
     </PreBuildEvent>
-  </ItemDefinitionGroup>
+   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CDSalesOrderAddOn.h" />
+    <ClInclude Include="CDItemsPriceListsAddOn.h" />
+    <ClInclude Include="CDSalesPeopleAddOn.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CDSalesOrderAddOn.cpp" />
+    <ClCompile Include="CDItemsPriceListsAddOn.cpp" />
+    <ClCompile Include="CDSalesPeopleAddOn.cpp" />
     <ClCompile Include="SnapSystemDocumentsinterface.cpp" />
     <ClCompile Include="SnapSystemDocuments.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -289,6 +295,11 @@
   <ItemGroup>
     <None Include="beginh.dex" />
     <None Include="endh.dex" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SnapSystemDbl\SnapSystemDbl.vcxproj">
+      <Project>{947b5590-e55f-11f0-bc07-ad2166ceb91f}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

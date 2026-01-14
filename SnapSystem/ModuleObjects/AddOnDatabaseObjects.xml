@@ -1,3 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AddOnDatabaseObjects>
+    <AdditionalColumns>
+        <Table namespace="ERP.SaleOrders.Dbl.MA_SaleOrdDetails">
+            <AlterTable namespace="SnapSystem.SnapSystem.SnapSystemDbl"
+                        release="3" createstep="1" />
+        </Table>
+        <Table namespace="ERP.PricePolicies.Dbl.MA_ItemsPriceLists">
+            <AlterTable namespace="SnapSystem.SnapSystem.SnapSystemDbl"
+                        release="3" createstep="2" />
+        </Table>
+        <Table namespace="ERP.SalesPeople.Dbl.MA_SalesPeople">
+            <AlterTable namespace="SnapSystem.SnapSystem.SnapSystemDbl"
+                        release="3" createstep="3" />
+        </Table>
+    </AdditionalColumns>
 </AddOnDatabaseObjects>

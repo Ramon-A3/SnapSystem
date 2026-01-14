@@ -1,0 +1,29 @@
+{
+	"id": "IDC_SALESORDER_BODY_DETAIL",
+	"items": [
+		{
+			"type": "ColTitle",
+			"controlClass": "MoneyEdit",
+			"binding": { "datasource": "Detail.LastCost" },
+			"id": "IDC_SALESORDER_DETAIL_LASTCOST",
+			"text": "Costo Ultimo",
+			"name": "IDC_SALESORDER_DETAIL_LASTCOST"
+		},
+		{
+			"type": "ColTitle",
+			"controlClass": "MoneyEdit",
+			"binding": { "datasource": "Detail.Margin" },
+			"id": "IDC_SALESORDER_DETAIL_MARGIN",
+			"text": "Margine",
+			"name": "IDC_SALESORDER_DETAIL_MARGIN"
+		},
+		{
+			"type": "ColTitle",
+			"controlClass": "MoneyEdit",
+			"binding": { "datasource": "Detail.SalesPersonMarginComm" },
+			"id": "IDC_SALESORDER_DETAIL_SALESPERSONMARGINCOMM",
+			"text": "Provvigione",
+			"name": "IDC_SALESORDER_DETAIL_SALESPERSONMARGINCOMM"
+		}
+	]
+}
