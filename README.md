@@ -124,6 +124,12 @@ La procedura deve:
   - Margine
   - Provvigione
 
+Nella procedura si può filtrare o solo per data o per ordini, da nr a nr.
+La procedura deve aggiornare i campi Costo Ultimo, Margine e Provvigione del documento Fatture.
+**La procedura serve perché spesso loro aggiungo i costi dopo l’emissione dei documenti di vendita, quindi è necessario andare a ricalcolare le provvigioni come sopra descritto.
+Questo ricalcolo serve solo per la politica provvigionale 01.**
+
+
 **Documento**: Fatture
 
 ❌ Non Fatta
