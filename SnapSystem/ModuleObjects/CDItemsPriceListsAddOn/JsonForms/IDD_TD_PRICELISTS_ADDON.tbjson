@@ -1,17 +1,40 @@
 {
-    "id": "IDD_ITEM_PRICELISTS_BODY",
+    "id": "IDD_ITEMS",
     "items": [
         {
-            "type": "ColTitle",
-            "controlClass": "MoneyEdit",
-            "binding": {
-                "datasource": "ItemsPriceLists.MinimumCost"
-            },
-            "id": "IDC_PRICELISTS_MINIMUMCOST",
-            "text": "Minimum Cost",
-            "name": "IDC_PRICELISTS_MINIMUMCOST",
-            "grayed": true,
-            "numberDecimal": "{{NAMoneyDecimal}}"
+            "id": "IDD_ITEMS_VIEW",
+            "items": [
+                {
+                    "id": "IDC_ITM_TABDLG_MISC",
+                    "items": [
+                        {
+                            "id": "IDC_TG_ITEMS_SALEPURCHASE",
+                            "items": [
+                                {
+                                    "id": "IDD_TD_ITEMS_PRICELIST",
+                                    "items": [
+                                        {
+                                            "id": "IDC_PRICELISTS_ITM_BODY",
+                                            "items": [
+                                                {
+                                                    "type": "ColTitle",
+                                                    "controlClass": "MoneyEdit",
+                                                    "binding": {
+                                                        "datasource": "PriceLists.MinimumCost"
+                                                    },
+                                                    "id": "IDC_PRICELISTS_MINIMUMCOST",
+                                                    "text": "Costo Minimo",
+                                                    "name": "IDC_PRICELISTS_MINIMUMCOST"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }
