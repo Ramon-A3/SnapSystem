@@ -5,8 +5,10 @@
 #include "stdafx.h"
 #include "CDSalesOrderAddOn.h"
 #include "CDItemsPriceListsAddOn.h"
+#include "CDSalesPeopleAddOn.h"
 
 #include <Items\Documents\DItems.h>
+#include <SalesPeople\Documents\DSalesPeople.h>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -46,6 +48,10 @@ BEGIN_ADDON_INTERFACE()
 	BEGIN_CLIENT_DOC()
 		WHEN_SERVER_DOC(DSalesOrder)
 			ATTACH_CLIENT_DOC(CDSalesOrderAddOn, _NS_CD("SalesOrderAddOn"))
+		END_SERVER_DOC()
+
+		WHEN_SERVER_DOC(DSalesPeople)
+			ATTACH_CLIENT_DOC(CDSalesPeopleAddOn, _NS_CD("SalesPeopleAddOn"))
 		END_SERVER_DOC()
 	END_CLIENT_DOC()
 
