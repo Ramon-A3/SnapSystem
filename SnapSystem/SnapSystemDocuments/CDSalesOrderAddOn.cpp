@@ -4,6 +4,7 @@
 #include <SaleOrders\Documents\DBTSalesOrder.h>
 #include <SaleOrders\Documents\UISalesOrder.hjson>
 #include <SaleOrders\Dbl\TSalesOrder.h>
+#include <SaleOrders\ModuleObjects\SaleOrd\JsonForms\IDD_TD_SALESORDER_MAIN_DATA.hjson>
 #include <Inventory\Dbl\TItemsBalances.h>
 #include <SalesPeople\Dbl\TSalesPeople.h>
 #include <PricePolicies\Dbl\TItemPricesPolicies.h>
@@ -134,8 +135,8 @@ IMPLEMENT_DYNAMIC(TRSalesPeopleLocal, TableReader)
 //////////////////////////////////////////////////////////////////////////////
 //             RRItemsPriceListsByItem - RowsetReader for MA_ItemsPriceLists
 //             Selects most recent valid price based on:
-//               - ValidityStart <= CurrentDate (ordered DESC for most recent)
-//               - ValidityEnd >= CurrentDate OR ValidityEnd is empty/null
+//               - ValidityStart <= PriceListValidityDate (ordered DESC for most recent)
+//               - ValidityEnd >= PriceListValidityDate OR ValidityEnd is empty/null
 //               - Quantity >= OrderQuantity
 //////////////////////////////////////////////////////////////////////////////
 class RRItemsPriceListsByItem : public RowsetReader
@@ -174,12 +175,11 @@ public:
 				m_pTable->Disconnect();
 			return aResult;
 		}
-
-		// Iterate through results to find first valid price
+		
 		// Query is ordered by StartingValidityDate DESC, Quantity ASC
 		while (!m_pTable->IsEOF())
 		{
-			// Check validity period: EndDate empty OR EndDate >= CurrentDate
+			// Check validity period: EndDate empty OR EndDate >= PriceListValidityDate
 			if (GetRecord()->f_ValidityEndingDate.IsEmpty() ||
 				m_Date <= GetRecord()->f_ValidityEndingDate)
 			{
@@ -219,7 +219,7 @@ protected:
 		m_pTable->AddFilterColumn(GetRecord()->f_Item);
 		m_pTable->AddParam(szP1, GetRecord()->f_Item);
 
-		// Filter by date range: StartingValidityDate <= CurrentDate
+		// Filter by date range: StartingValidityDate <= PriceListValidityDate
 		DataDate ToDateEmpty(DataDate::NULLDATE);
 		m_pTable->AddFilterColumn(GetRecord()->f_StartingValidityDate, _T("<="));
 		m_pTable->AddParam(szP2, GetRecord()->f_StartingValidityDate);
@@ -287,6 +287,7 @@ BEGIN_MESSAGE_MAP(CDSalesOrderAddOn, CClientDoc)
 	ON_EN_VALUE_CHANGED(IDC_SALESORDER_DETAIL_ITEM, OnItemChanged)
 	ON_EN_VALUE_CHANGED(IDC_SALESORDER_DETAIL_QTY, OnQuantityChanged)
 	ON_EN_VALUE_CHANGED(IDC_SALESORDER_DETAIL_VAL_UNIT, OnUnitValueChanged)
+	ON_EN_VALUE_CHANGED(IDC_SALESORDER_ADT_DATE_VALIDITY_PRICELIST, OnPriceListValidityDateChanged)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -367,9 +368,30 @@ double CDSalesOrderAddOn::GetLastCostFromBalances(const DataStr& sItem)
 }
 
 //-----------------------------------------------------------------------------
+// GetPriceListValidityDate - Gets PriceListValidityDate from SalesOrder header
+// Returns the date to use for price list validation
+// If the field is empty, falls back to AfxGetApplicationDate()
+//-----------------------------------------------------------------------------
+DataDate CDSalesOrderAddOn::GetPriceListValidityDate()
+{
+	DSalesOrder* pServerDoc = GetServerDoc();
+	if (pServerDoc)
+	{
+		TSalesOrder* pHeader = pServerDoc->GetHeader();
+		if (pHeader && !pHeader->f_PriceListValidityDate.IsEmpty())
+		{
+			return pHeader->f_PriceListValidityDate;
+		}
+	}
+	// Fallback to application date if header or field is not available
+	return AfxGetApplicationDate();
+}
+
+//-----------------------------------------------------------------------------
 // GetPriceFromPriceList - Fetches Price from MA_ItemsPriceLists
 // Uses custom RRItemsPriceListsByItem to query price by Item only
 // Automatically selects most recent valid price based on date and quantity
+// Uses PriceListValidityDate from header for date validation
 //-----------------------------------------------------------------------------
 double CDSalesOrderAddOn::GetPriceFromPriceList(const DataStr& sPriceList, const DataStr& sItem, double dQty)
 {
@@ -379,9 +401,12 @@ double CDSalesOrderAddOn::GetPriceFromPriceList(const DataStr& sPriceList, const
 	if (sItem.IsEmpty())
 		return dPrice;
 
+	// Get validity date from header (PriceListValidityDate)
+	DataDate aValidityDate = GetPriceListValidityDate();
+
 	// Use our custom RowsetReader that searches by Item only (no PriceList filter)
 	RRItemsPriceListsByItem aRRPriceLists(GetServerDoc());
-	if (aRRPriceLists.FindRecord(sItem, AfxGetApplicationDate(), (DataQty)dQty) == RowsetReader::FOUND)
+	if (aRRPriceLists.FindRecord(sItem, aValidityDate, (DataQty)dQty) == RowsetReader::FOUND)
 	{
 		// Get Price from MA_ItemsPriceLists record (DataMon type)
 		dPrice = (double)aRRPriceLists.GetRecord()->f_Price;
@@ -442,6 +467,7 @@ double CDSalesOrderAddOn::GetBaseCommission(const DataStr& sSalesperson)
 
 //-----------------------------------------------------------------------------
 // GetMinimumCostFromPriceList - Fetches MinimumCost from MA_ItemsPriceLists
+// Uses PriceListValidityDate from header for date validation
 //-----------------------------------------------------------------------------
 double CDSalesOrderAddOn::GetMinimumCostFromPriceList(const DataStr& sItem, double dQty)
 {
@@ -450,9 +476,12 @@ double CDSalesOrderAddOn::GetMinimumCostFromPriceList(const DataStr& sItem, doub
     if (sItem.IsEmpty())
         return dMinimumCost;
 
+    // Get validity date from header (PriceListValidityDate)
+    DataDate aValidityDate = GetPriceListValidityDate();
+
     // Use existing RRItemsPriceListsByItem to find the record
     RRItemsPriceListsByItem aRRPriceLists(GetServerDoc());
-    if (aRRPriceLists.FindRecord(sItem, AfxGetApplicationDate(), (DataQty)dQty) == RowsetReader::FOUND)
+    if (aRRPriceLists.FindRecord(sItem, aValidityDate, (DataQty)dQty) == RowsetReader::FOUND)
     {
         // Get AddOn fields from the record
         TItemsPriceListsAddOn* pAddOn = (TItemsPriceListsAddOn*)aRRPriceLists.GetRecord()->GetAddOnFields(
@@ -663,4 +692,15 @@ void CDSalesOrderAddOn::RecalculateAllDetails()
 		}
 	}
 }
+
+//-----------------------------------------------------------------------------
+// OnPriceListValidityDateChanged - Triggered when PriceListValidityDate changes in header
+// Recalculates all detail lines with the new validity date
+//-----------------------------------------------------------------------------
+void CDSalesOrderAddOn::OnPriceListValidityDateChanged()
+{
+	// Recalculate all details with the new PriceListValidityDate
+	RecalculateAllDetails();
+}
+
 
