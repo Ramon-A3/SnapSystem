@@ -2,6 +2,7 @@
     "id": "IDD_TD_SALESPEOPLE_COMMISSION_CALC",
     "items": [
         {
+            "afterItem": "IDC_SALESPEOPLE_COMMBASE",
             "anchor": "COL1",
             "autoHScroll": true,
             "binding": {
@@ -14,6 +15,7 @@
             "id": "IDC_SALESPEOPLE_MAXDEVIATIONPERC",
             "type": "Edit",
             "vfill": true,
+            "text": "Percentuale Massima Scostamento",
             "width": 30,
             "captionSize": 3,
             "controlSize": 2
