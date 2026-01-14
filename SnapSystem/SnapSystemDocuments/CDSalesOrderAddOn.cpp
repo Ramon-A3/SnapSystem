@@ -25,6 +25,10 @@ static char THIS_FILE[] = __FILE__;
 // Parameter names for queries
 static TCHAR szP1[] = _T("P1");
 static TCHAR szP2[] = _T("P2");
+static TCHAR szP3[] = _T("P3");
+
+// Hardcoded PriceList filter value
+static TCHAR szPriceList10[] = _T("10");
 
 // Policy constants
 static TCHAR szPolicy01[] = _T("01");  // LastCost from MA_ItemsBalances
@@ -211,7 +215,7 @@ protected:
 	{
 		m_pTable->SelectAll();
 
-		// Filter only by Item (no PriceList filter!)
+		// Filter by Item
 		m_pTable->AddFilterColumn(GetRecord()->f_Item);
 		m_pTable->AddParam(szP1, GetRecord()->f_Item);
 
@@ -219,6 +223,10 @@ protected:
 		DataDate ToDateEmpty(DataDate::NULLDATE);
 		m_pTable->AddFilterColumn(GetRecord()->f_StartingValidityDate, _T("<="));
 		m_pTable->AddParam(szP2, GetRecord()->f_StartingValidityDate);
+
+		// Filter by PriceList ("10")
+		m_pTable->AddFilterColumn(GetRecord()->f_PriceList);
+		m_pTable->AddParam(szP3, GetRecord()->f_PriceList);
 
 		// ValidityEndingDate filter handled in FindRecord loop
 
@@ -231,6 +239,7 @@ protected:
 	{
 		m_pTable->SetParamValue(szP1, m_Item);
 		m_pTable->SetParamValue(szP2, m_Date);
+		m_pTable->SetParamValue(szP3, DataStr(szPriceList10));
 	}
 
 	virtual BOOL IsEmptyQuery()
@@ -293,7 +302,7 @@ CDSalesOrderAddOn::CDSalesOrderAddOn()
 BOOL CDSalesOrderAddOn::OnAttachData()
 {
 	// Attach our event manager to intercept SalesAgent events
-	// When SalesAgent fires OnCommissionPolicySalespersonChanged, our handler is called
+	
 	Attach(new CSalesOrderAddOnEventMng(this));
 	
 	return TRUE;
@@ -317,22 +326,20 @@ BOOL CDSalesOrderAddOn::OnPrepareAuxData()
 
 //-----------------------------------------------------------------------------
 // OnPrepareAuxData(UINT nID) - Called when a specific TileDialog is prepared
-// This is the KEY method to intercept SalesPeople tile changes!
+// 
 // When the user changes Policy or Salesperson in the SalesPeople tile,
-// this method is called with nID == IDD_TD_SALESPEOPLE
+// 
 //-----------------------------------------------------------------------------
 void CDSalesOrderAddOn::OnPrepareAuxData(UINT nID)
 {
-	// IMPORTANT: Call base class FIRST to ensure all other AddOns have processed
-	// This allows CDSaleOrdSalesPeople to do BindDBT() before we read the values
+	
 	__super::OnPrepareAuxData(nID);
 
-	// Check if the SalesPeople tile is being prepared/updated
-	// This happens when Policy or Salesperson fields change
+	
 	if (nID == IDD_TD_SALESPEOPLE)
 	{
 		// Recalculate all detail lines with the new Policy/Salesperson values
-		// Called AFTER __super to ensure the header record has been updated
+		
 		RecalculateAllDetails();
 	}
 }
@@ -386,7 +393,7 @@ double CDSalesOrderAddOn::GetPriceFromPriceList(const DataStr& sPriceList, const
 //-----------------------------------------------------------------------------
 // GetCostByPolicy - Fetches cost based on SalespersonPolicy
 // Policy 01: LastCost from MA_ItemsBalances
-// Policy 02: Price from MA_ItemsPriceLists
+// Policy 02: MinimumCost from MA_ItemsPriceLists
 // Empty/Unknown: returns 0
 //-----------------------------------------------------------------------------
 double CDSalesOrderAddOn::GetCostByPolicy(const DataStr& sItem, const DataStr& sPriceList, const DataStr& sPolicy, double dQty)
@@ -401,10 +408,10 @@ double CDSalesOrderAddOn::GetCostByPolicy(const DataStr& sItem, const DataStr& s
 	{
 		dCost = GetLastCostFromBalances(sItem);
 	}
-	// Policy 02: Get Price from MA_ItemsPriceLists
+	// Policy 02: Get MinimumCost from MA_ItemsPriceLists 
 	else if (sPolicy == szPolicy02)
 	{
-		dCost = GetPriceFromPriceList(sPriceList, sItem, dQty);
+		dCost = GetMinimumCostFromPriceList(sItem, dQty);
 	}
 	// No policy or unknown policy: return 0 (dCost already initialized to 0)
 
@@ -490,10 +497,7 @@ double CDSalesOrderAddOn::GetMaxDeviationPerc(const DataStr& sSalesperson)
 // Margin = (UnitValue - LastCost) × Quantity
 // SalesPersonMarginComm = Margin × (BaseCommission / 100)
 //
-// This method reads the Policy directly from the header record. It works correctly
-// when called from CSalesOrderAddOnEventMng::OnCommissionPolicySalespersonChanged()
-// because at that point the SalesAgent has already updated the record with the
-// new value via its TB_EVENT handler.
+//
 //-----------------------------------------------------------------------------
 void CDSalesOrderAddOn::CalculateMarginAndCommission(TSaleOrdDetails* pDetail)
 {
@@ -527,8 +531,7 @@ void CDSalesOrderAddOn::CalculateMarginAndCommission(TSaleOrdDetails* pDetail)
 	double dUnitValue = (double)pDetail->f_UnitValue;
 
 	// Get header values directly from the record
-	// When called from CSalesOrderAddOnEventMng::OnCommissionPolicySalespersonChanged(),
-	// the record already has the NEW value because SalesAgent updates it first.
+
 	DataStr sSalesperson = pHeader->f_Salesperson;
 	DataStr sSalespersonPolicy = pHeader->f_SalespersonPolicy;
 	DataStr sPriceList = pHeader->f_PriceList;
@@ -561,7 +564,8 @@ void CDSalesOrderAddOn::CalculateMarginAndCommission(TSaleOrdDetails* pDetail)
 		double dMaxDeviationPerc = GetMaxDeviationPerc(sSalesperson);
 		
 		double dDifference = dUnitValue - dPriceListPrice;
-		dCommission = (dPriceListPrice - dMinimumCost) + (dDifference * dMaxDeviationPerc / 100.0);
+		// Policy 02 commission is calculated per unit, then scaled by quantity
+		dCommission = ((dPriceListPrice - dMinimumCost) + (dDifference * dMaxDeviationPerc / 100.0)) * dQty;
 	}
 	else
 	{
