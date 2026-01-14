@@ -5,18 +5,9 @@
 -- Type: numeric(19,6) - Consistent with Price field in MA_ItemsPriceLists
 -- ============================================================================
 
-IF NOT EXISTS (
-    SELECT 1 FROM sys.columns 
-    WHERE object_id = object_id(N'[dbo].[MA_ItemsPriceLists]') 
-      AND name = 'MinimumCost'
-)
-BEGIN
-    ALTER TABLE [dbo].[MA_ItemsPriceLists]
-        ADD [MinimumCost] [numeric](19,6) NULL
-        CONSTRAINT [DF_MA_ItemsPriceLists_MinimumCost] DEFAULT ((0))
-
-    PRINT 'Column MinimumCost added to MA_ItemsPriceLists successfully'
-END
-ELSE
-    PRINT 'Column MinimumCost already exists in MA_ItemsPriceLists'
+if not exists (select dbo.syscolumns.name from dbo.syscolumns, dbo.sysobjects
+where dbo.sysobjects.name = 'MA_ItemsPriceLists' and dbo.sysobjects.id = dbo.syscolumns.id and
+dbo.syscolumns.name = 'MinimumCost')
+ALTER TABLE [dbo].[MA_ItemsPriceLists]
+    ADD [MinimumCost] [numeric](19,6) NULL CONSTRAINT [DF_MA_ItemsPriceLists_MinimumCost] DEFAULT ((0))
 GO

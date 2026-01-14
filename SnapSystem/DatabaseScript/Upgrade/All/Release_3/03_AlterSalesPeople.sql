@@ -5,18 +5,13 @@
 -- Type: numeric(19,6) - Consistent with percentage fields in MA_SalesPeople
 -- ============================================================================
 
-IF NOT EXISTS (
-    SELECT 1 FROM sys.columns 
-    WHERE object_id = object_id(N'[dbo].[MA_SalesPeople]') 
-      AND name = 'MaxDeviationPerc'
-)
+if not exists (select dbo.syscolumns.name from dbo.syscolumns, dbo.sysobjects
+where dbo.sysobjects.name = 'MA_SalesPeople' and dbo.sysobjects.id = dbo.syscolumns.id and
+dbo.syscolumns.name = 'MaxDeviationPerc')
 BEGIN
     ALTER TABLE [dbo].[MA_SalesPeople]
-        ADD [MaxDeviationPerc] [numeric](19,6) NULL
-        CONSTRAINT [DF_MA_SalesPeople_MaxDeviationPerc] DEFAULT ((40))
-
-    PRINT 'Column MaxDeviationPerc added to MA_SalesPeople successfully'
+        ADD [MaxDeviationPerc] [numeric](19,6) NULL CONSTRAINT [DF_MA_SalesPeople_MaxDeviationPerc] DEFAULT ((40))
+       
+    UPDATE [dbo].[MA_SalesPeople] SET [MaxDeviationPerc] = 40 WHERE [MaxDeviationPerc] IS NULL
 END
-ELSE
-    PRINT 'Column MaxDeviationPerc already exists in MA_SalesPeople'
 GO
