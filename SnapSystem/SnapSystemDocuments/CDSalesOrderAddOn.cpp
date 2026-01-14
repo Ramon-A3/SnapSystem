@@ -580,6 +580,12 @@ void CDSalesOrderAddOn::CalculateMarginAndCommission(TSaleOrdDetails* pDetail)
 	pAddOn->f_LastCost = dCost;
 	pAddOn->f_Margin = dMargin;
 	pAddOn->f_SalesPersonMarginComm = dCommission;
+
+	// Also populate ERP standard commission amount field
+	pDetail->f_SalespersonCommAmt = dCommission;
+	
+	pDetail->f_SalespersonCommAuto = FALSE; 
+	pDetail->f_SalespersonCommCtgAuto = FALSE;
 }
 
 //-----------------------------------------------------------------------------
