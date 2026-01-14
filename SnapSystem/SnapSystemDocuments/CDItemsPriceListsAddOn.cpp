@@ -26,9 +26,11 @@ IMPLEMENT_DYNCREATE(CDItemsPriceListsAddOn, CClientDoc)
 
 //-----------------------------------------------------------------------------
 BEGIN_MESSAGE_MAP(CDItemsPriceListsAddOn, CClientDoc)
-    ON_EN_VALUE_CHANGED(IDC_ITEM_PRICELIST_PRICE, OnPriceChanged)
-    ON_EN_VALUE_CHANGED(IDC_ITEM_PRICELIST_DISC1, OnDiscount1Changed)
-    ON_EN_VALUE_CHANGED(IDC_ITEM_PRICELIST_DISC2, OnDiscount2Changed)
+    ON_EN_VALUE_CHANGED(IDC_PRICELISTS_ITM_PRICE, OnPriceChanged)
+    ON_EN_VALUE_CHANGED(IDC_PRICELISTS_ITM_DISCOUNT, OnDiscount1Changed)
+    // Note: There is no separate IDC for Discount2 in the ERP UI.
+    // MinimumCost will be recalculated when Price or Discount1 changes.
+    // If Discount2 is edited via direct DB access, recalculate on form load.
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -41,6 +43,22 @@ CDItemsPriceListsAddOn::CDItemsPriceListsAddOn()
 //-----------------------------------------------------------------------------
 BOOL CDItemsPriceListsAddOn::OnAttachData()
 {
+    return TRUE;
+}
+
+//-----------------------------------------------------------------------------
+BOOL CDItemsPriceListsAddOn::OnInitAuxData()
+{
+    return TRUE;
+}
+
+//-----------------------------------------------------------------------------
+BOOL CDItemsPriceListsAddOn::OnPrepareAuxData()
+{
+    // This is called during NEW/EDIT/BROWSE mode transitions
+    // Recalculate MinimumCost for all price list rows
+    RecalculateAllPriceLists();
+
     return TRUE;
 }
 
@@ -98,13 +116,16 @@ void CDItemsPriceListsAddOn::RecalculateAllPriceLists()
     if (!pServerDoc)
         return;
 
-    // Get DBT for price lists
-    DBTSlaveBuffered* pDBTPriceLists = (DBTSlaveBuffered*)pServerDoc->GetDBTItemsPriceLists();
-    if (!pDBTPriceLists)
+    // Get the CDItemsPricesPolicies CClientDoc which manages the PriceLists DBT
+    CDItemsPricesPolicies* pPricesPolicies = (CDItemsPricesPolicies*)pServerDoc->GetClientDoc(
+        RUNTIME_CLASS(CDItemsPricesPolicies));
+    if (!pPricesPolicies || !pPricesPolicies->m_pDBTItemsPriceLists)
         return;
 
-    // Iterate through all rows and recalculate
-    for (int i = 0; i < pDBTPriceLists->GetSize(); i++)
+    DBTItemsPriceLists* pDBTPriceLists = pPricesPolicies->m_pDBTItemsPriceLists;
+
+    // Iterate through all rows and recalculate (use GetUpperBound like ERP does)
+    for (int i = 0; i <= pDBTPriceLists->GetUpperBound(); i++)
     {
         TItemsPriceLists* pRecord = (TItemsPriceLists*)pDBTPriceLists->GetRow(i);
         if (pRecord)
@@ -121,23 +142,22 @@ void CDItemsPriceListsAddOn::OnPriceChanged()
     if (!pServerDoc)
         return;
 
-    DBTSlaveBuffered* pDBTPriceLists = (DBTSlaveBuffered*)pServerDoc->GetDBTItemsPriceLists();
-    if (!pDBTPriceLists)
+    // Get the CDItemsPricesPolicies CClientDoc which manages the PriceLists DBT
+    CDItemsPricesPolicies* pPricesPolicies = (CDItemsPricesPolicies*)pServerDoc->GetClientDoc(
+        RUNTIME_CLASS(CDItemsPricesPolicies));
+    if (!pPricesPolicies || !pPricesPolicies->m_pDBTItemsPriceLists)
         return;
 
-    TItemsPriceLists* pRecord = (TItemsPriceLists*)pDBTPriceLists->GetRow(pDBTPriceLists->GetCurrentRow());
+    DBTItemsPriceLists* pDBTPriceLists = pPricesPolicies->m_pDBTItemsPriceLists;
+
+    // GetCurrentRow() returns the current SqlRecord* directly
+    TItemsPriceLists* pRecord = (TItemsPriceLists*)pDBTPriceLists->GetCurrentRow();
     if (pRecord)
         CalculateMinimumCost(pRecord);
 }
 
 //-----------------------------------------------------------------------------
 void CDItemsPriceListsAddOn::OnDiscount1Changed()
-{
-    OnPriceChanged();  // Same logic
-}
-
-//-----------------------------------------------------------------------------
-void CDItemsPriceListsAddOn::OnDiscount2Changed()
 {
     OnPriceChanged();  // Same logic
 }

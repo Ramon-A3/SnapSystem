@@ -6,6 +6,7 @@
 #pragma once
 
 #include <Items\Documents\DItems.h>
+#include <PricePolicies\AddOnsItems\UIItemsPricesPolicies.hjson>
 #include <SnapSystem\ModuleObjects\CDItemsPriceListsAddOn\JsonForms\IDD_TD_PRICELISTS_ADDON.hjson>
 
 #include "beginh.dex"
@@ -28,6 +29,8 @@ public:
 
 protected:
     virtual BOOL OnAttachData();
+    virtual BOOL OnInitAuxData();
+    virtual BOOL OnPrepareAuxData();
 
 public:
     void CalculateMinimumCost(TItemsPriceLists* pRecord);
@@ -36,7 +39,7 @@ public:
 protected:
     afx_msg void OnPriceChanged();
     afx_msg void OnDiscount1Changed();
-    afx_msg void OnDiscount2Changed();
+    // Note: OnDiscount2Changed removed - no UI control for Discount2 in Items PriceList grid
 
     DECLARE_MESSAGE_MAP()
 };
