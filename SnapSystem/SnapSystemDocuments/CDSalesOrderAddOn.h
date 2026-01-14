@@ -74,6 +74,9 @@ protected:
 	// New methods for Policy 02
 	double GetMinimumCostFromPriceList(const DataStr& sItem, double dQty);
 	double GetMaxDeviationPerc(const DataStr& sSalesperson);
+	
+	// Date validation helper - uses PriceListValidityDate from header
+	DataDate GetPriceListValidityDate();
 
 	void RecalculateAllDetails();
 
@@ -82,6 +85,7 @@ protected:
 	afx_msg void OnItemChanged();
 	afx_msg void OnQuantityChanged();
 	afx_msg void OnUnitValueChanged();
+	afx_msg void OnPriceListValidityDateChanged();
 	//}}AFX_MSG
 	
 	DECLARE_MESSAGE_MAP()
