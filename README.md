@@ -86,7 +86,7 @@ Esempio: Valore unitario = 500, prezzo listino = 450
 **Nota**: Per il 40 abbiamo aggiunto un campo chiamato 'Percentuale Massima Scostamento' in `MA_SalesPeople` e messo di default 40, in modo tale che se un giorno loro volessero cambiarlo, possono farlo.
 - **Implementazione**: `SnapSystemDbl/TSalesPeopleAddOn.cpp:21-38` (field `f_MaxDeviationPerc`, default 40), `SnapSystemDocuments/CDSalesOrderAddOn.cpp:471-493` (metodo `GetMaxDeviationPerc()`)
 
-❌ Non sono riuscito visualizzare il nuovo campo "Percentuale Massima Scostamento" nell'interfaccia utente.
+❌ Ho aggiunto il campo 'Percentuale Massima Scostamento' in Agente però non compare, anche nel database è presente e prendo da la il valore, quindi se si riesce a capirne il motivo per cui non si vede. Ho cercato di mettere il campo sotto a Commissione di base.
 
 **CASO MINORE** (Valore unitario < prezzo listino)
 
