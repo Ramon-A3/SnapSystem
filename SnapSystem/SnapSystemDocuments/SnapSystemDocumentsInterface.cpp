@@ -4,6 +4,9 @@
 
 #include "stdafx.h"
 #include "CDSalesOrderAddOn.h"
+#include "CDItemsPriceListsAddOn.h"
+
+#include <Items\Documents\DItems.h>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -19,7 +22,7 @@ static char THIS_FILE[] = __FILE__;
 
 //-----------------------------------------------------------------------------
 BEGIN_ADDON_INTERFACE()
-	DATABASE_RELEASE(2)
+	DATABASE_RELEASE(3)
 
 	//-----------------------------------------------------------------------------
 	BEGIN_TABLES()
@@ -45,6 +48,16 @@ BEGIN_ADDON_INTERFACE()
 			ATTACH_CLIENT_DOC(CDSalesOrderAddOn, _NS_CD("SalesOrderAddOn"))
 		END_SERVER_DOC()
 	END_CLIENT_DOC()
+
+	//-----------------------------------------------------------------------------
+	// Register CDItemsPriceListsAddOn for all DItems family documents
+	// This enables MinimumCost calculation on the Items form Price Lists grid
+	//-----------------------------------------------------------------------------
+	BEGIN_FAMILY_CLIENT_DOC()
+		WHEN_FAMILY_SERVER_DOC(DItems)
+			ATTACH_FAMILY_CLIENT_DOC(CDItemsPriceListsAddOn, _NS_CD("ItemsPriceListsAddOn"))
+		END_FAMILY_SERVER_DOC()
+	END_FAMILY_CLIENT_DOC()
 
 END_ADDON_INTERFACE()
 
