@@ -29,7 +29,7 @@
 
 ### ANAGRAFICA AGENTI
 
-- **O costo ultimo**, o prezzo di listino scontato, da decidere in base al codice 'Politica Provvigionale' in Anagrafica Agenti:
+- **O costo ultimo**, o prezzo di listino scontato, da decidere in base al codice 'Politica Provvigionale' in Anagrafica Agenti, **Politica Provvigionale definisce il tipo di calcolo della provvigione**:
   - Codice 01: costo ultimo
   - Codice 02: prezzo di listino scontato
   - ✅ Già fatto, solo da controllare.
@@ -44,7 +44,7 @@
   - Per lo sconto controlliamo `Discount1` e `Discount2` dalla tabella `MA_ItemsPriceLists`
   - **Implementazione**: `SnapSystemDocuments/CDSalesOrderAddOn.cpp:134-251` (classe `RRItemsPriceListsByItem`)
 
-#### AGGIUNGERE COLONNA 'Costo Minimo'
+#### AGGIUNGERE COLONNA 'Costo Minimo' -> Valore creato come base di partenza al posto del costo ultimo.
 
 ✅ Già fatto, solo da controllare.
 - **Implementazione**: `SnapSystemDocuments/CDItemsPriceListsAddOn.cpp:65-110` (metodo `CalculateMinimumCost()`)
@@ -118,8 +118,8 @@ Le colonne **Costo**, **Margine** sono da aggiungere anche su:
 ### PROCEDURE DA FARE
 
 La procedura deve:
-- Filtrare solo per data o per ordini (da nr a nr)
-- Aggiornare i campi:
+- Filtrare solo per data E per ordini (da nr a nr)
+- Aggiornare i campi nelle fatture:
   - Costo Ultimo
   - Margine
   - Provvigione
